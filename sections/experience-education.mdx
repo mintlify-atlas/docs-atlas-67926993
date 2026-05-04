@@ -1,0 +1,90 @@
+---
+title: "Work experience and education in the portfolio"
+description: "Experience and Education use CommonItem and the Card component. Add entries to Experience.json or Education.json — the data format is identical for both."
+---
+
+The Experience and Education sections share the same `CommonItem` TypeScript interface, the same `Card` component, and the same `useSectionData` hook pattern. The only difference between them is which JSON file they load: `Experience.json` or `Education.json`. This means adding or editing entries works identically for both sections.
+
+## Experience data
+
+`src/app/data/Experience.json` currently lists two roles:
+
+```json src/app/data/Experience.json
+[
+  {
+    "title": "Catalog Associate",
+    "subtitle": "Amazon Development Center",
+    "duration": "Jan 2025 - Present",
+    "detail": "Currently working at Amazon as a Catalog Associate, specializing in Product Knowledge Classification. In my role, I have classified thousands of products accurately according to Standard Operating Procedures (SOPs), maintaining a consistent reliability score of 100%. I collaborate closely with cross-functional teams to ensure product data quality and correctness, helping improve catalog accuracy and customer experience. Additionally, streamline classification workflows by identifying process improvements, contributing to higher efficiency and faster turnaround times in product onboarding."
+  },
+  {
+    "title": "Web Developer Intern",
+    "subtitle": "Rungta Infotech Pvt Ltd",
+    "duration": "Feb 2024 - Apr 2024",
+    "detail": "Worked as a Web Development Intern at Rungta Infotech PVT LTD, where I gained hands-on experience in building and maintaining web applications. Throughout my internship, I learned and worked with key web development technologies including PHP, HTML, CSS, JavaScript, and SQL. I contributed to developing responsive web pages, implementing dynamic features, and managing database interactions, while following best practices for clean code and efficient performance. This experience strengthened my problem-solving skills and understanding of full-stack web development in a real-world environment."
+  }
+]
+```
+
+## Education data
+
+`src/app/data/Education.json` currently lists two qualifications:
+
+```json src/app/data/Education.json
+[
+  {
+    "title": "Diploma in Electrical Engineering (Lateral)",
+    "subtitle": "Rungta College of Engineering & Technology",
+    "duration": "2017-2019",
+    "detail": "I completed my Diploma in Electrical Engineering from Rungta College of Engineering & Technology, where I gained extensive knowledge during my academic years (2017-2019 Lateral Entry after ITI). I worked on various projects, including an Arduino-based robotic arm capable of picking up and placing objects, and a path-following vehicle designed to reach a predefined destination. Both projects were controllable via an Android device using Bluetooth communication."
+  },
+  {
+    "title": "Bachelors in Computer Science Engineering (Lateral)",
+    "subtitle": "Rungta College of Engineering & Technology",
+    "duration": "2021-2024",
+    "detail": "I completed my Bachelor of Technology in Computer Science Engineering from 2021 to 2024 (3 years due to Lateral Entry). Throughout my academic journey, I gained a solid understanding of how computers work, as well as the wide range of applications and software in the industry. During this time, I was part of a team that developed a social media-like platform for pets, designed to help users arrange playdates. Additionally, I worked on various web-based management software projects. These experiences significantly enhanced my knowledge and skills in web development and software engineering."
+  }
+]
+```
+
+## CommonItem type
+
+Both sections use the `CommonItem` interface defined in `src/app/types/Section.ts`:
+
+```typescript src/app/types/Section.ts
+export interface CommonItem {
+  title: string;
+  subtitle: string;
+  duration: string;
+  detail: React.ReactNode;
+  className?: string;
+  link?: string;       // Optional URL rendered as a button or link
+  linkIcon?: IconType; // Optional icon component for the link
+}
+```
+
+The `link` and `linkIcon` fields are optional. When `link` is present, the `Card` component renders it as a clickable element.
+
+## Adding an experience or education entry
+
+<Steps>
+  <Step title="Open the correct JSON file">
+    Open `src/app/data/Experience.json` to add a work entry, or `src/app/data/Education.json` to add an academic qualification.
+  </Step>
+  <Step title="Add a new object to the array">
+    Append a new object with `title`, `subtitle`, `duration`, and `detail`. Add `link` only if you want a button linking to a certificate, company page, or other URL.
+
+    ```json
+    {
+      "title": "Senior Software Engineer",
+      "subtitle": "Acme Corp",
+      "duration": "Jun 2025 - Present",
+      "detail": "Description of your responsibilities, achievements, and technologies used in this role.",
+      "link": "https://acmecorp.example.com"
+    }
+    ```
+  </Step>
+  <Step title="Save the file">
+    Save the JSON file. The new `Card` appears automatically in the corresponding section on next page load.
+  </Step>
+</Steps>

@@ -1,0 +1,117 @@
+---
+title: "Contact form with rate limiting via Netlify"
+description: "Netlify function uses nodemailer with SMTP and a 3/hour per-IP rate limit. Documents request fields, HTTP response codes, CORS, and required SMTP env vars."
+---
+
+The portfolio includes a fully functional contact form backed by a Netlify serverless function at `/.netlify/functions/sendMail`. When a visitor submits the form, the browser sends a POST request to that endpoint. The function validates the input, enforces a per-IP rate limit, and delivers the message via SMTP using nodemailer.
+
+## Architecture
+
+The contact form follows a simple client-to-serverless flow:
+
+<Steps>
+  <Step title="Visitor submits the form">
+    The browser collects the form fields and sends a `POST` request to `/.netlify/functions/sendMail` with a JSON body.
+  </Step>
+  <Step title="Rate limit check">
+    The function checks an in-memory `ipStore` map. If the visitor's IP has sent 3 or more emails in the past hour, the function returns HTTP 429.
+  </Step>
+  <Step title="Input validation">
+    The function confirms that `firstname`, `email`, and `message` are all present. Missing fields return HTTP 400.
+  </Step>
+  <Step title="Email sent via nodemailer">
+    A nodemailer transporter configured with the SMTP environment variables sends the email to the portfolio owner.
+  </Step>
+</Steps>
+
+## Rate limiting
+
+The function uses an in-memory `ipStore` object to track how many emails each IP address has sent within a rolling one-hour window.
+
+```typescript sendMail.ts (rate limiting)
+const ipStore: Record<string, { count: number; firstRequestTime: number }> = {};
+const MAX_EMAILS_PER_HOUR = 3;
+const ONE_HOUR_MS = 60 * 60 * 1000;
+
+// Clean up stale entries every 10 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const ip in ipStore) {
+    if (now - ipStore[ip].firstRequestTime > ONE_HOUR_MS) {
+      delete ipStore[ip];
+    }
+  }
+}, 10 * 60 * 1000);
+```
+
+When a request arrives, the function checks the client IP extracted from `x-forwarded-for`, `client-ip`, or `x-nf-client-connection-ip` headers. If the count reaches `MAX_EMAILS_PER_HOUR` (3), it returns a 429 response.
+
+<Warning>
+  The rate limiter is stored in memory and resets on every function cold start. It is not shared across multiple Netlify function instances — heavy concurrent traffic could bypass it. For a production rate limiter, use a persistent store like Upstash Redis.
+</Warning>
+
+## Request format
+
+Send a `POST` request to `/.netlify/functions/sendMail` with a JSON body:
+
+```json
+{
+  "firstname": "Jane",
+  "lastname": "Doe",
+  "email": "jane@example.com",
+  "subject": "Hello from your portfolio",
+  "message": "I'd like to get in touch about a project."
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `firstname` | string | Yes | Sender's first name |
+| `lastname` | string | No | Sender's last name |
+| `email` | string | Yes | Sender's email address (used as `replyTo`) |
+| `subject` | string | No | Email subject (defaults to "New Contact Form Submission") |
+| `message` | string | Yes | The message body |
+
+## Response codes
+
+| Status | Meaning |
+|---|---|
+| `200` | Email sent successfully |
+| `400` | Missing required fields (`firstname`, `email`, or `message`) |
+| `405` | Non-POST HTTP method |
+| `429` | Rate limit exceeded — max 3 emails per hour from this IP |
+| `500` | SMTP error — check environment variables and SMTP server |
+
+## CORS
+
+The function restricts cross-origin requests to only the portfolio's domain:
+
+```typescript sendMail.ts (CORS headers)
+const corsHeaders = {
+  "Access-Control-Allow-Origin": `https://davinash97.xyz`,
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+```
+
+`OPTIONS` preflight requests are handled and return a 200 with the CORS headers. All other responses include these headers as well.
+
+## Environment variables
+
+The function reads SMTP credentials from environment variables. Set these in the Netlify dashboard under **Site configuration → Environment variables**:
+
+<Note>
+  The following environment variables must be set for the contact form to send email:
+
+  | Variable | Description |
+  |---|---|
+  | `SMTP_HOST` | Your SMTP server hostname (e.g. `smtp.gmail.com`) |
+  | `SMTP_PORT` | SMTP port — `465` for SSL, `587` for STARTTLS |
+  | `SMTP_USER` | SMTP username / sending email address |
+  | `SMTP_PASS` | SMTP password or app-specific password |
+  | `SMTP_TO` | Recipient address — where contact form emails are delivered |
+</Note>
+
+<Tip>
+  Use `netlify dev` to run Netlify Functions alongside the Next.js dev server locally. Create a `.env` file in the project root with the SMTP variables to test the contact form end-to-end without deploying.
+</Tip>

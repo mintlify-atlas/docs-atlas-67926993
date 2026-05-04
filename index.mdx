@@ -1,133 +1,61 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
-icon: 'star'
+title: "Avinash's Portfolio: Next.js Developer Showcase"
+description: "Documentation for a personal developer portfolio built with Next.js, React, TypeScript, TailwindCSS, and Framer Motion — deployed on Netlify."
 ---
 
-## Setting up
+Avinash's portfolio is a single-page web application that showcases skills, projects, work experience, education, and achievements. Built with Next.js 16, TypeScript, TailwindCSS v4, and Framer Motion, it features smooth animations, auto dark mode, a Web Worker-powered data layer, and a rate-limited contact form backed by a Netlify serverless function.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Introduction" icon="circle-info" href="/introduction">
+    Learn what this portfolio is, how it's structured, and the key design decisions behind it.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Getting Started" icon="rocket" href="/getting-started">
+    Clone, install, and run the portfolio locally in a few steps.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Architecture" icon="sitemap" href="/architecture/project-structure">
+    Explore the project structure, data layer, and reusable component system.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Portfolio Sections" icon="layout" href="/sections/hero-about">
+    Understand each section of the portfolio — Hero, Skills, Projects, and more.
   </Card>
-</Columns>
+  <Card title="Features" icon="stars" href="/features/animations">
+    Deep dives into animations, dark mode, and the contact form implementation.
+  </Card>
+  <Card title="Deployment" icon="cloud" href="/deployment/netlify">
+    How the portfolio is deployed to Netlify with a custom domain and serverless functions.
+  </Card>
+</CardGroup>
 
-## Create beautiful pages
+## Quick overview
 
-Everything you need to create world-class documentation.
+<Steps>
+  <Step title="Clone the repository">
+    Get the source code from GitHub and install dependencies with Node.js.
+  </Step>
+  <Step title="Run locally">
+    Start the Next.js dev server with Turbopack for instant hot-reload.
+  </Step>
+  <Step title="Customize your data">
+    Edit the JSON files in `src/app/data/` to add your own skills, projects, and experience.
+  </Step>
+  <Step title="Deploy to Netlify">
+    Push to GitHub — Netlify automatically builds and deploys with the `@netlify/plugin-nextjs` adapter.
+  </Step>
+</Steps>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## Key features
 
-## Make your content agent ready
-
-Make your docs work for humans and AI agents alike.
-
-<Columns cols={2}>
-  <Card
-    title="Prompt component"
-    icon="robot"
-    href="/agent-ready/prompt"
-  >
-    Embed shareable AI prompts readers can copy or open in Cursor.
+<CardGroup cols={2}>
+  <Card title="Framer Motion animations" icon="wand-magic-sparkles" href="/features/animations">
+    Scroll-triggered section reveals and interactive heading effects built with Framer Motion.
   </Card>
-  <Card
-    title="Visibility"
-    icon="eye"
-    href="/agent-ready/visibility"
-  >
-    Show different content to humans and agents reading your docs.
+  <Card title="Auto dark mode" icon="moon" href="/features/dark-mode">
+    Automatic light/dark switching based on the visitor's OS preference using CSS media queries.
   </Card>
-  <Card
-    title="Contextual menu"
-    icon="bolt"
-    href="/agent-ready/contextual"
-  >
-    Give readers one-click access to Claude, ChatGPT, Cursor, and more.
+  <Card title="Web Worker data loading" icon="microchip" href="/architecture/data-layer">
+    Section data is loaded off the main thread via a Web Worker to keep the UI responsive.
   </Card>
-  <Card
-    title="AI coding tools"
-    icon="wand-magic-sparkles"
-    href="/ai-tools/claude-code"
-  >
-    Set up Claude Code, Cursor, or Windsurf with Mintlify's skill.
+  <Card title="Rate-limited contact form" icon="envelope" href="/features/contact-form">
+    Serverless email function on Netlify with a built-in 3 emails/hour per-IP rate limit.
   </Card>
-</Columns>
-
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+</CardGroup>

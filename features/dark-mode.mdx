@@ -1,0 +1,81 @@
+---
+title: "Auto dark mode with OS preference detection"
+description: "Themes switch via CSS custom properties and prefers-color-scheme. Covers five color tokens, Tailwind dark: utility classes, and DevTools-based testing."
+---
+
+The portfolio automatically switches between light and dark themes based on the visitor's OS preference. There is no manual toggle — the switch is handled entirely by CSS using the `prefers-color-scheme` media query and a set of custom properties defined on `:root`. When a visitor's device is in dark mode, the site adopts the dark palette instantly.
+
+## How it works
+
+All colors are defined as CSS custom properties (variables) in `globals.css`. The light theme values are set on `:root`, and the dark theme overrides them inside a `@media (prefers-color-scheme: dark)` block.
+
+```css globals.css
+:root {
+  --primary: #6b46c1;
+  --secondary: #805ad5;
+  --accent: #d6bcfa;
+  --foreground: #1a202c;
+  --background: #f7fafc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #9f7aea;
+    --secondary: #805ad5;
+    --accent: #6b46c1;
+    --foreground: #edf2f7;
+    --background: #1a202c;
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+```
+
+When the OS switches to dark mode, the browser re-evaluates the media query and swaps out all the custom property values simultaneously — no JavaScript, no flicker.
+
+## Color tokens
+
+Each CSS variable has a specific role across the portfolio:
+
+| Variable | Light value | Dark value | Usage |
+|---|---|---|---|
+| `--primary` | `#6b46c1` (purple-700) | `#9f7aea` (purple-400) | Links, hover highlights, primary accent |
+| `--secondary` | `#805ad5` (purple-600) | `#805ad5` (purple-600) | Secondary accents (same in both modes) |
+| `--accent` | `#d6bcfa` (purple-200) | `#6b46c1` (purple-700) | Subtle accent elements |
+| `--foreground` | `#1a202c` (gray-900) | `#edf2f7` (gray-100) | Body text |
+| `--background` | `#f7fafc` (gray-50) | `#1a202c` (gray-900) | Page background |
+
+## TailwindCSS integration
+
+The main `page.tsx` layout uses Tailwind's `dark:` variant alongside CSS variables for section-level backgrounds:
+
+```tsx page.tsx
+<main className="flex flex-col gap-5 text-center items-center justify-center p-0 m-0 bg-gray-200 text-black dark:bg-gray-900 dark:text-gray-200">
+```
+
+Tailwind's `dark:` prefix works via the `prefers-color-scheme` media query by default (when using TailwindCSS v4 without a manual `darkMode` strategy). This means both the `dark:` utility classes and the CSS custom properties respond to the same OS signal.
+
+## Adding dark-mode-aware styles
+
+When you add a new component, use CSS variables for colors that should change with the theme, and Tailwind's `dark:` prefix for utility-based overrides.
+
+```tsx New component example
+// Using CSS variable — responds to dark mode automatically
+<span style={{ color: "var(--primary)" }}>Highlighted text</span>
+
+// Using Tailwind dark: variant
+<div className="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100">
+  Card content
+</div>
+```
+
+<Info>
+  Because this uses the `prefers-color-scheme` CSS media query, the theme follows the OS setting. Visitors cannot manually override it — adding a toggle would require JavaScript to set a `data-theme` attribute or class on `<html>` and modify the CSS accordingly.
+</Info>
+
+<Tip>
+  Test dark mode in Chrome DevTools: open DevTools → More tools → Rendering → scroll to "Emulate CSS media feature" → set `prefers-color-scheme` to `dark`. The site will instantly switch to the dark palette without changing your OS settings.
+</Tip>

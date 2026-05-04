@@ -1,0 +1,178 @@
+---
+title: "Data layer: JSON files and Web Workers"
+description: "All section content lives in JSON files. A Web Worker loads them off the main thread and returns fully typed arrays to React components via useSectionData."
+---
+
+The portfolio follows a data-first architecture: every piece of content — skills, projects, experience, education, achievements, and miscellaneous work — lives in a plain JSON file under `src/app/data/`. At runtime, a dedicated Web Worker reads those files off the main thread and returns the parsed data to React via the `useSectionData` hook. This keeps JSON parsing from competing with animations and user interactions on the main thread.
+
+## Data files
+
+All six JSON files follow a flat array structure. Each element in the array maps directly to one of the TypeScript interfaces defined in `Section.ts`.
+
+| File | Used by | Shape |
+|---|---|---|
+| `Skill.json` | Skills section | `SkillItem[]` — skill category title and an array of skill names |
+| `Project.json` | Projects section | `ProjectItem[]` — title, image path, description, bullet points, link, and tech stack |
+| `Experience.json` | Experience section | `CommonItem[]` — job title, company, date range, and description |
+| `Education.json` | Education section | `CommonItem[]` — degree, institution, date range, and description |
+| `Achievement.json` | Achievements section | `AchievementItem[]` — certification title, issuer, year, description, and verification link |
+| `Other.json` | Other section | `CommonItem[]` — project title, platform/context, year, and description |
+
+Here is a representative excerpt from `Skill.json`:
+
+```json
+[
+  {
+    "title": "Programming Language",
+    "set": ["Java", "JavaScript", "TypeScript", "Python"]
+  },
+  {
+    "title": "Web Development",
+    "set": ["React.js", "Next.js", "TailwindCSS", "SpringBoot"]
+  },
+  {
+    "title": "Database",
+    "set": ["PostgreSql", "MongoDb"]
+  }
+]
+```
+
+## TypeScript types
+
+All interfaces that describe the shape of these JSON files, as well as the union type and lookup map used by the hook, are defined in `src/app/types/Section.ts`:
+
+```typescript
+import { IconType } from "react-icons";
+
+// Used by Experience, Education, and Other sections
+export interface CommonItem {
+  title: string;
+  subtitle: string;
+  duration: string;
+  detail: React.ReactNode;
+  className?: string;
+  link?: string;       // Optional URL
+  linkIcon?: IconType; // Optional icon component
+}
+
+export interface ProjectItem {
+  title: string;
+  image: string;
+  detail: string;
+  points: string[];
+  className?: string;
+  link: string;
+  techStack: string[];
+  linkIcon?: IconType;
+}
+
+export interface SkillItem {
+  title: string;
+  set: string[];
+  className?: string;
+}
+
+export interface AchievementItem {
+  title: string;
+  subtitle: string;
+  duration: string;
+  detail: string;
+  link: string;
+}
+
+export interface ContactItem {
+  title: string;
+  link?: string;
+  image: IconType;
+  content: React.ReactNode;
+}
+
+// Union of all valid section name strings
+export type SectionType =
+  | "Contact"
+  | "Education"
+  | "Experience"
+  | "Other"
+  | "Project"
+  | "Skill"
+  | "Achievement";
+
+// Maps each section name to its typed array
+export type SectionDataMap = {
+  Contact: ContactItem[];
+  Education: CommonItem[];
+  Experience: CommonItem[];
+  Other: CommonItem[];
+  Project: ProjectItem[];
+  Skill: SkillItem[];
+  Achievement: AchievementItem[];
+};
+```
+
+## LoadData Web Worker
+
+The worker lives at `src/app/worker/LoadData.ts`. It listens for a message containing a `type` string, dynamically imports the matching JSON file using the `@data` webpack alias, and posts the parsed array back to the main thread:
+
+```typescript
+onmessage = async (event) => {
+  const { type } = event.data;
+
+  try {
+    const importedModule = await import(`@data/${type}.json`);
+    postMessage({ type, data: importedModule.default });
+  } catch {
+    postMessage({ type, data: [] });
+  }
+};
+```
+
+If the import fails — for example, because a file does not exist for the requested type — the worker falls back to posting an empty array, so the UI renders gracefully without throwing.
+
+<Info>
+  The Web Worker prevents heavy JSON parsing from blocking the main thread, keeping animations and interactions smooth during page load.
+</Info>
+
+## useSectionData hook
+
+The hook is exported from `src/app/hooks/useSectionData.tsx`. It creates a `Worker` instance pointed at `LoadData.ts`, sends the section type name as a message, listens for the response, stores the typed data in local state, and terminates the worker on cleanup:
+
+```typescript
+export function useSectionData<T extends SectionType>(title: T) {
+  const [data, setData] = useState<SectionDataMap[T]>([]);
+
+  useEffect(() => {
+    const worker = new Worker(
+      new URL("../worker/LoadData.ts", import.meta.url)
+    );
+
+    worker.onmessage = (event) => {
+      if (event.data.type === title) {
+        setData(event.data.data as SectionDataMap[T]);
+      }
+    };
+
+    worker.postMessage({ type: title });
+
+    return () => worker.terminate();
+  }, [title]);
+
+  return data;
+}
+```
+
+The generic type parameter `T extends SectionType` ensures the return type is automatically narrowed to the correct item array type — no manual casting is needed at the call site.
+
+### Usage example
+
+```typescript
+import { useSectionData } from "@/app/hooks/useSectionData";
+
+export default function SkillSection() {
+  const data = useSectionData("Skill"); // Returns SkillItem[]
+  // data is fully typed as SectionDataMap["Skill"] = SkillItem[]
+}
+```
+
+<Note>
+  Adding a new data section requires creating a JSON file in `src/app/data/`, adding its type to `SectionType` and `SectionDataMap` in `Section.ts`, and creating the corresponding page component under `src/app/page/`.
+</Note>

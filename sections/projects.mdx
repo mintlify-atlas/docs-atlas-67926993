@@ -1,0 +1,100 @@
+---
+title: "Projects section: showcasing your work"
+description: "Projects section reads Project.json and renders ProjectCard components with a cover image, bullet points, tech stack badges, and a link to the live site."
+---
+
+The Projects section reads its data from `src/app/data/Project.json` via the `useSectionData` hook and renders one `ProjectCard` per entry. Each card shows a project image, a short description, a list of highlight bullet points, tech stack badges, and a link to the live deployment. Cards animate in with a staggered fade-up as they scroll into view, and the grid switches from one column on small screens to two columns on extra-large screens.
+
+## Data structure
+
+`Project.json` is an array of `ProjectItem` objects. The current data contains two projects:
+
+```json src/app/data/Project.json
+[
+  {
+    "title": "Global Buzz",
+    "image": "/assets/global-buzz.jpg",
+    "details": "GlobalBuzz is a dynamic news web application built with Next.js, Tailwind CSS, and integrated with NewsAPI to fetch real-time news articles from various sources. The platform provides users with the latest news across multiple categories in a fast, responsive, and modern interface.",
+    "points": [
+      "Real-time news updates powered by NewsAPI.",
+      "Clean, responsive UI built using Tailwind CSS.",
+      "Server-side rendering and optimized performance with Next.js.",
+      "Dynamic routing to browse news by categories.",
+      "Deployed on Netlify for fast and reliable access."
+    ],
+    "link": "https://globalbuzz.davinash97.xyz",
+    "techStack": ["Next.js", "TailwindCSS"]
+  },
+  {
+    "title": "Password Generator",
+    "image": "/assets/pass-gen.jpg",
+    "details": "Pass-Gen is a lightweight, browser-based password generator built using pure HTML, CSS, and Vanilla JavaScript. It provides users with the ability to generate strong random passwords instantly without relying on any external frameworks or libraries.",
+    "points": [
+      "Generates secure, random passwords with configurable options.",
+      "Simple, intuitive user interface for ease of use.",
+      "Copy-to-clipboard functionality for quick password usage.",
+      "Fully responsive design, works seamlessly across devices.",
+      "Lightweight codebase ensuring fast load times and performance."
+    ],
+    "link": "https://pass-gen.davinash97.xyz",
+    "techStack": ["HTML", "CSS", "JavaScript"]
+  }
+]
+```
+
+## ProjectItem type
+
+The shape of each project entry is defined by the `ProjectItem` interface in `src/app/types/Section.ts`:
+
+```typescript src/app/types/Section.ts
+export interface ProjectItem {
+  title: string;
+  image: string;
+  detail: string;
+  points: string[];
+  className?: string;
+  link: string;
+  techStack: string[];
+  linkIcon?: IconType;
+}
+```
+
+<Note>
+  The JSON field is `"details"` (plural) but the TypeScript interface declares `detail` (singular). The Web Worker that loads the data maps the JSON onto this interface. When adding a new project, use `"details"` as the JSON key to match the existing entries.
+</Note>
+
+## Adding a project
+
+<Steps>
+  <Step title="Open Project.json">
+    Open `src/app/data/Project.json` in your editor.
+  </Step>
+  <Step title="Add a new project object">
+    Append a new object to the array following the `ProjectItem` shape. Fill in all required fields: `title`, `image`, `details`, `points`, `link`, and `techStack`.
+
+    ```json
+    {
+      "title": "My New Project",
+      "image": "/assets/my-new-project.jpg",
+      "details": "A short description of what the project does and the problem it solves.",
+      "points": [
+        "Key feature or highlight one.",
+        "Key feature or highlight two.",
+        "Key feature or highlight three."
+      ],
+      "link": "https://my-new-project.example.com",
+      "techStack": ["React.js", "Node.js", "PostgreSql"]
+    }
+    ```
+  </Step>
+  <Step title="Add the project image">
+    Place the project screenshot or cover image in `public/assets/` and use `/assets/filename.jpg` as the `image` value in the JSON. The path is relative to the `public/` directory.
+  </Step>
+  <Step title="Save the file">
+    Save `Project.json`. The new `ProjectCard` appears automatically in the Projects section on the next page load.
+  </Step>
+</Steps>
+
+<Note>
+  Project images are served from `/public/assets/`. Reference them as `/assets/filename.jpg` in the JSON — do not include the `public` prefix in the path.
+</Note>

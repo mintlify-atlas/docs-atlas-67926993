@@ -1,0 +1,74 @@
+{
+  "projectType": "frontend",
+  "projectName": "Avinash's Portfolio",
+  "projectDescription": "A personal developer portfolio built with Next.js, React, TypeScript, and TailwindCSS, showcasing skills, projects, experience, education, achievements, and a contact form.",
+  "theme": "willow",
+  "primaryColor": "#6b46c1",
+  "lightColor": "#d6bcfa",
+  "darkColor": "#9f7aea",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Overview",
+        "pages": [
+          "introduction",
+          "getting-started"
+        ]
+      },
+      {
+        "group": "Architecture",
+        "pages": [
+          "architecture/project-structure",
+          "architecture/data-layer",
+          "architecture/components"
+        ]
+      },
+      {
+        "group": "Sections",
+        "pages": [
+          "sections/hero-about",
+          "sections/skills",
+          "sections/projects",
+          "sections/experience-education",
+          "sections/achievements-other"
+        ]
+      },
+      {
+        "group": "Features",
+        "pages": [
+          "features/animations",
+          "features/dark-mode",
+          "features/contact-form"
+        ]
+      },
+      {
+        "group": "Deployment",
+        "pages": [
+          "deployment/netlify",
+          "deployment/configuration"
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Single-page portfolio with animated sections using Framer Motion",
+    "Auto day/night dark mode based on OS preference",
+    "Web Worker-based data loading to keep main thread responsive",
+    "Contact form with rate limiting (3 emails/hour per IP) via Netlify Functions",
+    "Reusable component architecture with DRY principles",
+    "TypeScript throughout with strict type definitions",
+    "TailwindCSS v4 styling with custom CSS variables for theming",
+    "Deployed on Netlify with custom domain and SSL/TLS"
+  ],
+  "publicApiSurface": [
+    "useSectionData<T extends SectionType>(title: T): SectionDataMap[T]",
+    "SectionTitle({ title: string }): JSX.Element",
+    "Card({ title, subtitle, duration, detail, className, link, linkIcon }: CommonItem)",
+    "ProjectCard({ title, image, detail, points, link, techStack, linkIcon }: ProjectItem)",
+    "SkillCard({ title, set, className }: SkillItem)",
+    "ContactCard({ title, link, image, content }: ContactItem)",
+    "AnimatedSection",
+    "LoadData web worker — postMessage({ type: SectionType }) => { type, data }",
+    "Netlify Function: POST /.netlify/functions/sendMail — { firstname, lastname, email, subject, message }"
+  ]
+}

@@ -1,0 +1,83 @@
+---
+title: "Running Avinash's portfolio locally in minutes"
+description: "Clone, install dependencies, and run Avinash's Next.js portfolio site locally in a few steps — no special tooling beyond Node.js 20 and Git required."
+---
+
+To run the portfolio on your machine you need Node.js, Git, and a copy of the repository. The contact form is handled by a Netlify Function, so you will also need a Netlify account and SMTP credentials if you want email delivery to work during local development — but you can skip that and still explore every other part of the site.
+
+<Tip>Use `npm run dev` with Turbopack for the fastest local development experience. Turbopack is enabled by default in the `dev` script.</Tip>
+
+## Prerequisites
+
+Before you start, make sure you have the following installed:
+
+- **Node.js 20 or later** — the project's type definitions target `@types/node ^20`.
+- **Git** — to clone the repository.
+- **A Netlify account** (optional) — required only if you want the contact form to send real emails. See the note below about environment variables.
+
+## Local setup
+
+<Steps>
+  <Step title="Clone the repository">
+    Run the following command to clone the repository and move into the project directory:
+
+    ```bash
+    git clone https://github.com/davinash97/davinash97.github.io.git && cd davinash97.github.io
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    Install all required packages with your preferred package manager:
+
+    <CodeGroup>
+      ```bash npm
+      npm install
+      ```
+
+      ```bash yarn
+      yarn install
+      ```
+
+      ```bash pnpm
+      pnpm install
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Start the development server">
+    Start the Next.js development server. The `dev` script uses `--turbopack` for faster incremental compilation:
+
+    ```bash
+    npm run dev
+    ```
+
+    You will see output confirming that Next.js started with Turbopack enabled.
+  </Step>
+
+  <Step title="Open the site in your browser">
+    Navigate to [http://localhost:3000](http://localhost:3000) to view the portfolio.
+  </Step>
+</Steps>
+
+<Note>
+  The contact form requires the following environment variables to send emails:
+  `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `SMTP_TO`. These are
+  read by the Netlify Function that handles form submissions. Without them, the
+  form will not deliver emails during local development. All other sections of
+  the site work without any environment configuration.
+</Note>
+
+## Available scripts
+
+The `package.json` defines four scripts:
+
+| Script | Command | Description |
+|---|---|---|
+| `dev` | `next dev --turbopack` | Start the development server with Turbopack. |
+| `build` | `next build` | Produce a production build of the site. |
+| `start` | `next start` | Serve the production build locally. |
+| `lint` | `next lint` | Run ESLint across the project. |
+
+## Project layout
+
+The repository follows Next.js App Router conventions. Source code lives under `src/app/`, with pages broken into per-section directories, shared components in `components/`, data files in `data/`, TypeScript types in `types/`, and the Web Worker in `worker/`. For a full breakdown of every directory and its purpose, see the [project structure](/architecture/project-structure) page.

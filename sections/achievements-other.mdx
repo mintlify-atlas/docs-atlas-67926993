@@ -1,0 +1,148 @@
+---
+title: "Certifications, achievements, and other projects"
+description: "Achievements shows certifications and LeetCode milestones from JSON. Other highlights side projects like custom kernels and bots, also loaded from JSON."
+---
+
+The Achievements section showcases certifications, course completions, and competitive programming milestones. The Other section highlights personal side projects that fall outside the main portfolio projects — things like kernel development, ROM porting, and bot maintenance. Both sections load data from their respective JSON files via `useSectionData`, map over the entries, and render each one as a `Card` component in a two-column grid.
+
+## Achievements data
+
+`src/app/data/Achievement.json` currently lists six entries:
+
+```json src/app/data/Achievement.json
+[
+  {
+    "title": "Programming in Java",
+    "subtitle": "IIT-KGP",
+    "duration": "2023",
+    "detail": "Successfully completed the Java Programming course offered by IIT-KGP through the NPTEL program. Gained understanding of OOP concepts, Data Structures, multithreading, and Collections. Achieved a score of 71% in the certification exam.",
+    "link": "https://archive.nptel.ac.in/content/noc/NOC23/SEM2/Ecertificates/106/noc23-cs74/Course/NPTEL23CS74S73270001020114236.pdf"
+  },
+  {
+    "title": "Collections in Java",
+    "subtitle": "Great Learning",
+    "duration": "2024",
+    "detail": "Gained comprehensive understanding of the Java Collections Framework including List, Set, Map, and their implementations. Covered collection algorithms, iteration techniques, sorting, and efficient data handling.",
+    "link": "https://www.mygreatlearning.com/certificate/PBQNAOTL"
+  },
+  {
+    "title": "OOP in Java",
+    "subtitle": "Great Learning",
+    "duration": "2024",
+    "detail": "Gained thorough understanding of OOP concepts including inheritance, multiple inheritance, polymorphism, encapsulation, interfaces, abstraction, classes, and objects.",
+    "link": "https://www.mygreatlearning.com/certificate/JMEIZSVL"
+  },
+  {
+    "title": "Java (Basics)",
+    "subtitle": "HackerRank",
+    "duration": "2024",
+    "detail": "Completed the Java Basics course on HackerRank, covering data types, conditionals, loops, arrays, functions, and basic I/O. Reinforced problem-solving skills through practical coding challenges.",
+    "link": "https://www.hackerrank.com/certificates/cbaf34afb204"
+  },
+  {
+    "title": "Software Engineering in Java",
+    "subtitle": "HackerRank",
+    "duration": "2024",
+    "detail": "Completed the Software Engineering Intern program on HackerRank, gaining experience in algorithms, data structures, OOP, and debugging through practical coding challenges.",
+    "link": "https://www.hackerrank.com/certificates/fd23e8486b66"
+  },
+  {
+    "title": "Solved 300+ questions in Java",
+    "subtitle": "LeetCode",
+    "duration": "2024",
+    "detail": "Solved over 300 coding problems on LeetCode focusing on Easy and Medium difficulty levels. Maintained a continuous streak of nearly ~290 days of daily practice.",
+    "link": "https://leetcode.com/u/davinash97"
+  }
+]
+```
+
+## Other projects data
+
+`src/app/data/Other.json` currently lists three entries. Note that none of these entries includes a `link` field — the `link` is optional for this section:
+
+```json src/app/data/Other.json
+[
+  {
+    "title": "AEON Custom Kernel",
+    "subtitle": "Samsung Exynos 7870",
+    "duration": "2017",
+    "detail": "AEON is a custom Linux kernel designed for Samsung devices with the Exynos 7870 chipset. It focuses on improving performance, optimizing battery life, and enabling advanced customization. This project highlights experience in low-level system programming, kernel development, and hardware optimization."
+  },
+  {
+    "title": "Custom ROMs",
+    "subtitle": "Samsung Exynos 7870",
+    "duration": "2017",
+    "detail": "Ported custom ROMs to various Samsung devices, including Galaxy J7 Nxt, Neo, J6, and A3. Collaborated with other developers to port and maintain ROMs for the Exynos 7870 chipset. Contributed as part of the Android Moderation Community."
+  },
+  {
+    "title": "Group Management Bot",
+    "subtitle": "Telegram",
+    "duration": "2017",
+    "detail": "Maintained a Python-based Telegram bot using the Python Telegram Bot library, focused on group management and automating tasks like fetching resources from GitHub and providing update notifications."
+  }
+]
+```
+
+## AchievementItem type
+
+Achievements use the `AchievementItem` interface from `src/app/types/Section.ts`. Unlike `CommonItem`, the `link` field is required:
+
+```typescript src/app/types/Section.ts
+export interface AchievementItem {
+  title: string;
+  subtitle: string;
+  duration: string;
+  detail: string;
+  link: string;
+}
+```
+
+Other projects use the `CommonItem` interface (shared with Experience and Education), where `link` is optional:
+
+```typescript src/app/types/Section.ts
+export interface CommonItem {
+  title: string;
+  subtitle: string;
+  duration: string;
+  detail: React.ReactNode;
+  className?: string;
+  link?: string;
+  linkIcon?: IconType;
+}
+```
+
+## Adding an achievement
+
+Open `src/app/data/Achievement.json` and append a new object. The `link` field is required by `AchievementItem` — provide the URL of the certificate, course page, or profile:
+
+```json
+{
+  "title": "AWS Cloud Practitioner",
+  "subtitle": "Amazon Web Services",
+  "duration": "2025",
+  "detail": "Passed the AWS Certified Cloud Practitioner exam, demonstrating foundational knowledge of AWS cloud concepts, services, security, and pricing.",
+  "link": "https://www.credly.com/badges/your-badge-id"
+}
+```
+
+Save the file. The new card appears in the Achievements section automatically.
+
+<Info>
+  Achievements with a `link` field render a "Visit" button on the card that links directly to the certificate or profile. Because `link` is required by the `AchievementItem` interface, every achievement entry must include a URL.
+</Info>
+
+## Adding an "Other" project
+
+Open `src/app/data/Other.json` and append a new object. The `link` field is optional for this section — include it only if you want to link to a repository, release page, or external resource:
+
+```json
+{
+  "title": "CLI Task Manager",
+  "subtitle": "Personal Project",
+  "duration": "2024",
+  "detail": "A command-line task manager written in Python with support for priorities, deadlines, and SQLite-backed persistence.",
+  "link": "https://github.com/davinash97/cli-task-manager"
+}
+```
+
+Save the file. The new card appears in the Other section automatically.

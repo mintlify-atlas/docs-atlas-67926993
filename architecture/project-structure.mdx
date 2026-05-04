@@ -1,0 +1,60 @@
+---
+title: "Project structure of the Next.js portfolio"
+description: "Directory layout for Avinash's Portfolio — Next.js App Router, per-section components, JSON data files, a Web Worker, and a Netlify serverless function."
+---
+
+Avinash's Portfolio is built on the Next.js App Router, which places all application code under `src/app/`. Each concern — UI components, JSON data, custom hooks, TypeScript types, and the Web Worker — lives in its own subdirectory, making the codebase easy to navigate and extend. A small `netlify/` directory at the project root contains the serverless function that handles contact form submissions.
+
+## Directory layout
+
+```text
+src/
+└── app/
+    ├── components/     # Reusable UI components
+    ├── data/           # JSON data files for each section
+    ├── hooks/          # Custom React hooks (useSectionData)
+    ├── page/           # Section-level page components
+    │   ├── hero/
+    │   ├── about/
+    │   ├── skill/
+    │   ├── project/
+    │   ├── experience/
+    │   ├── education/
+    │   ├── achievements/
+    │   ├── other/
+    │   └── contact/
+    ├── types/          # TypeScript interfaces
+    ├── utils/          # Utility functions
+    ├── worker/         # Web Worker for data loading
+    ├── globals.css     # Global styles and CSS variables
+    ├── layout.tsx      # Root layout with metadata
+    └── page.tsx        # Main entry point composing all sections
+netlify/
+└── functions/
+    └── sendMail.ts     # Serverless contact form handler
+public/
+└── assets/             # Static images
+```
+
+## Key configuration files
+
+**`next.config.ts`** configures two important behaviors. First, it adds a webpack alias so that `@data` resolves to `src/app/data`, keeping data imports short and consistent. Second, it declares a remote image pattern allowing Next.js's `<Image>` component to load images from `dummyimage.com` — used as a placeholder when a project image is unavailable. The `devIndicators` option is also set to `false` to suppress the development overlay.
+
+**`tsconfig.json`** sets `baseUrl` to `src`, enabling absolute imports from that root. It also declares four path aliases — `@page/*`, `@components/*`, `@data/*`, and `@hooks/*` — that map to their respective subdirectories under `src/app/`. The compiler targets ES2017 and uses `moduleResolution: bundler` for compatibility with Next.js's build pipeline.
+
+**`netlify.toml`** (at the project root) configures the Netlify deployment, pointing the build command at `next build` and specifying the `.next` output directory. The `netlify/functions/` directory is registered so that `sendMail.ts` is deployed as a serverless function.
+
+## Path aliases
+
+The project exposes four TypeScript path aliases, all declared in `tsconfig.json` and, for the `@data` alias, also enforced at the webpack level in `next.config.ts`:
+
+| Alias | Resolves to |
+|---|---|
+| `@components/*` | `src/app/components/*` |
+| `@data/*` | `src/app/data/*` |
+| `@hooks/*` | `src/app/hooks/*` |
+| `@page/*` | `src/app/page/*` |
+
+<Tip>
+  The webpack alias `@data` maps to `src/app/data`, making data imports cleaner across the codebase — including inside the Web Worker where TypeScript path aliases are not available at runtime.
+</Tip>

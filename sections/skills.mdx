@@ -1,0 +1,89 @@
+---
+title: "Skills section: displaying your tech stack"
+description: "Skills section reads Skill.json via useSectionData and renders each group as a SkillCard. Learn how to add new skill groups or extend existing ones."
+---
+
+The Skills section reads its data from `src/app/data/Skill.json` via the `useSectionData` hook and renders each entry as a `SkillCard` component. Skills are organized into named groups, and each group displays its title alongside the technologies it contains. The grid layout is responsive: one column on small screens, two on medium, and three on large and extra-large viewports.
+
+## Data structure
+
+`Skill.json` is an array of objects. Each object has a `title` string naming the skill group and a `set` array of technology name strings.
+
+```json src/app/data/Skill.json
+[
+  {
+    "title": "Programming Language",
+    "set": ["Java", "JavaScript", "TypeScript", "Python"]
+  },
+  {
+    "title": "Web Development",
+    "set": ["React.js", "Next.js", "TailwindCSS", "SpringBoot"]
+  },
+  {
+    "title": "Database",
+    "set": ["PostgreSql", "MongoDb"]
+  },
+  {
+    "title": "DevOps",
+    "set": ["Docker", "Git", "Github"]
+  },
+  {
+    "title": "Operating System",
+    "set": ["Windows", "Linux"]
+  }
+]
+```
+
+The corresponding TypeScript interface is `SkillItem`, defined in `src/app/types/Section.ts`:
+
+```typescript src/app/types/Section.ts
+export interface SkillItem {
+  title: string;
+  set: string[];
+  className?: string;
+}
+```
+
+## How it renders
+
+`Skill.tsx` calls `useSectionData("Skill")`, which dispatches a Web Worker to load `Skill.json` asynchronously. Once the data arrives, the component maps over the array and renders one `<SkillCard>` per entry. Each card displays:
+
+- The group `title` as a heading (e.g., "Programming Language")
+- The `set` array as a list of skill name badges or items beneath it
+
+Cards animate in with a staggered fade-up effect driven by Framer Motion as they enter the viewport.
+
+## Adding a skill group
+
+<Steps>
+  <Step title="Open Skill.json">
+    Open `src/app/data/Skill.json` in your editor.
+  </Step>
+  <Step title="Add a new object">
+    Append a new object to the array with a `title` and a `set` array containing the skill names you want to list.
+
+    ```json
+    {
+      "title": "Cloud",
+      "set": ["AWS", "Vercel", "Netlify"]
+    }
+    ```
+  </Step>
+  <Step title="Save the file">
+    Save `Skill.json`. The new skill group card appears automatically on the Skills section — no other changes required.
+  </Step>
+</Steps>
+
+## Adding a skill to an existing group
+
+Find the group in `Skill.json` whose `set` array you want to extend and append the new skill name string:
+
+```diff src/app/data/Skill.json
+  {
+    "title": "Web Development",
+-   "set": ["React.js", "Next.js", "TailwindCSS", "SpringBoot"]
++   "set": ["React.js", "Next.js", "TailwindCSS", "SpringBoot", "Express.js"]
+  }
+```
+
+Save the file. The updated list is reflected in the corresponding `SkillCard` immediately on next page load.

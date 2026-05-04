@@ -1,0 +1,69 @@
+---
+title: "Avinash's Portfolio: A Next.js Developer Showcase"
+description: "Explore Avinash's portfolio site — a Next.js 16 and React 19 app built with TypeScript, TailwindCSS v4, and Framer Motion, deployed on Netlify."
+---
+
+Avinash's Portfolio is a single-page application built by Avinash to present his skills, projects, work experience, education, and more in one place. It is built on Next.js 16 and React 19, written entirely in TypeScript, styled with TailwindCSS v4, and animated with Framer Motion. The site is deployed to Netlify with a custom domain and a server-side contact form powered by Netlify Functions and nodemailer.
+
+<Info>The live site is available at [davinash97.xyz](https://davinash97.xyz).</Info>
+
+<CardGroup cols={2}>
+  <Card title="Project structure" icon="folder-tree" href="/architecture/project-structure">
+    Understand how the repository is organized, from pages to data files to components.
+  </Card>
+  <Card title="Hero and About sections" icon="user" href="/sections/hero-about">
+    Learn how the opening sections introduce Avinash and display key personal information.
+  </Card>
+  <Card title="Animations" icon="wand-magic-sparkles" href="/features/animations">
+    See how Framer Motion is used to add subtle, non-intrusive motion to the UI.
+  </Card>
+  <Card title="Netlify deployment" icon="cloud" href="/deployment/netlify">
+    Deploy the portfolio to Netlify and configure the contact form's environment variables.
+  </Card>
+</CardGroup>
+
+## Tech stack
+
+The portfolio relies on the following technologies:
+
+| Technology | Version | Role |
+|---|---|---|
+| Next.js | 16 | React framework and routing |
+| React | 19 | UI component model |
+| TypeScript | 5 | Static typing across the codebase |
+| TailwindCSS | v4 | Utility-first CSS styling |
+| Framer Motion | 12 | Declarative animations |
+| Netlify Functions | — | Serverless contact form handler |
+| nodemailer | 7 | Email delivery from the contact form |
+
+## Design principles
+
+The codebase follows several deliberate conventions to keep it maintainable as it grows.
+
+**DRY architecture.** Logic and markup are not duplicated. Shared behaviour is extracted into reusable components under `src/app/components/` so individual section pages stay focused.
+
+**Data separation.** Content (projects, skills, experience entries, etc.) lives in JSON files under `src/app/data/` rather than being hardcoded inside components. Updating portfolio content means editing a data file, not touching component logic.
+
+**Web Worker off-thread loading.** Data loading is delegated to a Web Worker (`src/app/worker/LoadData.ts`) so the main thread is not blocked while section data is fetched and parsed.
+
+**Reusable components.** Each section consumes shared component primitives, avoiding one-off implementations that are hard to maintain.
+
+**Naming conventions.** Functions use `camelCase`, constants use `SCREAMING_CASE`, and regular variables use normal case. This makes it easy to tell at a glance what kind of identifier you are looking at.
+
+**TypeScript strict types.** All section data shapes are defined in `src/app/types/Section.ts` using TypeScript interfaces (`CommonItem`, `ProjectItem`, `SkillItem`, `AchievementItem`, `ContactItem`) and a discriminated `SectionDataMap` type, making data mismatches a compile-time error rather than a runtime surprise.
+
+## Portfolio sections
+
+The `Home` component in `src/app/page.tsx` renders nine sections in order:
+
+| Section | Description |
+|---|---|
+| **Hero** | The opening banner — Avinash's name, title, and primary call-to-action links. |
+| **About** | A short biographical introduction with personal background. |
+| **Skill** | A categorised list of technical skills grouped into sets. |
+| **Project** | Featured projects with images, descriptions, tech stacks, and links. |
+| **Experience** | Work history entries with title, company, duration, and detail. |
+| **Education** | Academic background with institution, degree, and duration. |
+| **Achievement** | Certifications, awards, or notable accomplishments with verifiable links. |
+| **Other** | Miscellaneous items such as open-source contributions or side activities. |
+| **Contact** | A contact form and social links for getting in touch. |

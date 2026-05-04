@@ -1,0 +1,148 @@
+---
+title: "Framer Motion animations in the portfolio"
+description: "Learn how Framer Motion powers scroll-triggered section reveals, per-character heading animations, card hover effects, and the initial page load state."
+---
+
+The portfolio uses Framer Motion throughout to create a polished, dynamic experience. Every section animates into view as you scroll, headings respond to hover with per-character effects, and cards elevate subtly on mouse-over — all driven by Framer Motion's declarative animation API.
+
+## AnimatedSection wrapper
+
+Every portfolio section is wrapped in `AnimatedSection` — a reusable component that fades and slides content up from below as it enters the viewport.
+
+```tsx AnimatedSection.tsx
+"use client";
+
+import { motion } from "framer-motion";
+import { ReactNode } from "react";
+
+interface AnimatedSectionProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export default function AnimatedSection({
+  children,
+  className = "",
+}: AnimatedSectionProps) {
+  return (
+    <motion.section
+      className={className}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: false, amount: 0.2 }}
+      exit="hidden"
+      variants={{
+        hidden: { opacity: 0, y: 50 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: {
+            duration: 0.6,
+            ease: "easeInOut",
+          },
+        },
+      }}>
+      {children}
+    </motion.section>
+  );
+}
+```
+
+The `viewport={{ once: false, amount: 0.2 }}` setting means the animation replays every time the section re-enters the viewport — scroll away and back to see it animate again.
+
+<Tip>
+  Wrap any new section component with `<AnimatedSection>` to get the same scroll-in animation automatically. Pass a `className` prop to apply additional Tailwind classes to the outer `motion.section`.
+</Tip>
+
+## SectionTitle animation
+
+Section headings use a per-character animation exported from `useSectionData.tsx`. Each character in the heading string is rendered as an individual `<span>` with its own Framer Motion animation.
+
+```tsx useSectionData.tsx (SectionTitle excerpt)
+export function SectionTitle({ title }: { title: string }) {
+  return (
+    <AnimatedSection>
+      <motion.h2
+        className={`w-full flex flex-row justify-center items-center cursor-pointer ${lex_deca.className}`}
+        initial={{ opacity: 0, y: -50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -50 }}
+        transition={{
+          duration: 0.8,
+          ease: [0.25, 0.1, 0.25, 1.0],
+        }}
+        viewport={{ amount: 0.3, once: false }}>
+        {Array.from(title, (char, index) => (
+          <span key={index} className="heading">
+            {char}
+          </span>
+        ))}
+      </motion.h2>
+    </AnimatedSection>
+  );
+}
+```
+
+The heading slides down from above (`y: -50 → 0`) and fades in as the section enters the viewport. Each character span also has a CSS hover animation (see [Heading hover animation](#heading-hover-animation) below).
+
+## Card hover effect
+
+The `Card` component uses Framer Motion's `motion.article` to create a subtle box-shadow elevation on hover.
+
+```tsx Card.tsx (motion excerpt)
+<motion.article
+  className={`max-w-md h-full justify-between flex flex-col gap-4 p-4 rounded-lg border border-gray-200 ${
+    className || ""
+  }`}
+  initial={{ boxShadow: "0 5px 5px rgba(0,0,0,0.10)" }}
+  whileHover={{
+    boxShadow: "0 8px 15px rgba(0,0,0,0.15)",
+    transition: { duration: 0.2 },
+  }}
+  transition={{ duration: 0.6 }}>
+  {/* card content */}
+</motion.article>
+```
+
+The shadow deepens and spreads on hover with a fast 200ms transition, giving cards a tactile feel without heavy movement.
+
+## Page load state
+
+The root `page.tsx` shows a `Loading` component for 500ms before rendering any sections. This masks the Web Worker data fetch and initial React hydration.
+
+```tsx page.tsx (load state)
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  const timer = setTimeout(() => setLoading(false), 500);
+  return () => clearTimeout(timer);
+}, []);
+
+if (loading) return <Loading />;
+```
+
+The `Loading` component displays a pulsing `<Loading.../>` text styled with the Great Vibes Google font and a semi-transparent black overlay.
+
+## Heading hover animation
+
+Beyond Framer Motion, section heading characters have a CSS hover animation defined in `globals.css`:
+
+```css globals.css
+.heading {
+  white-space: pre;
+  cursor: pointer;
+  display: inline-block;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.heading:hover {
+  color: var(--primary);
+  transform: translateY(-8px) rotate(5deg) scale(1.2);
+}
+```
+
+When you hover over any character in a section heading, it jumps up, rotates slightly, scales up, and changes to the primary purple color — giving each heading an interactive, playful feel.
+
+<Note>
+  Framer Motion is the only JavaScript animation library in this project. Avoid adding CSS animation libraries like Animate.css or other JS animation tools — they can conflict with Framer Motion's transform handling.
+</Note>

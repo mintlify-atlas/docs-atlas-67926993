@@ -1,0 +1,221 @@
+---
+title: "Reusable components and their prop types"
+description: "Prop reference for the shared components in Avinash's Portfolio: Card, ProjectCard, SkillCard, ContactCard, AnimatedSection, Loading, and SectionTitle."
+---
+
+The portfolio uses a small set of reusable, memoized React components. Every component is typed with interfaces imported from `src/app/types/Section.ts`, so you get full type safety and autocompletion when rendering data returned by `useSectionData`. All data-driven components receive their props directly from the hook's output array — no manual data transformation is needed.
+
+<Tip>
+  All data-loading components are driven by the `useSectionData` hook — just pass the section type string and spread each item from the returned array as props.
+</Tip>
+
+## Card
+
+`Card` is used by the Experience, Education, Achievement, and Other sections. It renders an animated `<article>` element with a title, subtitle, date range, description text, and an optional external link. The component is wrapped in `React.memo` to prevent unnecessary re-renders when the parent section re-renders.
+
+**Props** (from `CommonItem`):
+
+| Prop | Type | Required | Description |
+|---|---|---|---|
+| `title` | `string` | Yes | Primary heading shown at the top of the card |
+| `subtitle` | `string` | Yes | Secondary line, typically an organisation or location |
+| `duration` | `string` | Yes | Date range displayed alongside the subtitle |
+| `detail` | `React.ReactNode` | Yes | Body text or rich content describing the entry |
+| `className` | `string` | No | Additional CSS classes for layout overrides |
+| `link` | `string` | No | URL shown as a "Visit" link at the bottom of the card |
+| `linkIcon` | `IconType` | No | React Icons component; defaults to `IoIosLink` |
+
+**Usage example:**
+
+```typescript
+import Card from "@components/Card";
+
+<Card
+  title="Web Developer Intern"
+  subtitle="Rungta Infotech Pvt Ltd"
+  duration="Feb 2024 - Apr 2024"
+  detail="Gained hands-on experience building web applications with PHP, HTML, CSS, JavaScript, and SQL."
+/>
+```
+
+## ProjectCard
+
+`ProjectCard` is used by the Projects section. It renders a card with a cover image, title overlay, description paragraph, bullet-point feature list, a row of tech stack badges, and an external link.
+
+**Props** (from `ProjectItem`):
+
+| Prop | Type | Required | Description |
+|---|---|---|---|
+| `title` | `string` | Yes | Project name shown as an image overlay |
+| `image` | `string` | Yes | Path to the cover image (falls back to a placeholder) |
+| `detail` | `string` | Yes | Short description paragraph |
+| `points` | `string[]` | Yes | Ordered list of feature highlights |
+| `link` | `string` | Yes | URL to the live project |
+| `techStack` | `string[]` | Yes | List of technologies shown as pill badges |
+| `className` | `string` | No | Additional CSS classes |
+| `linkIcon` | `IconType` | No | Icon for the "Visit" link; defaults to `IoIosLink` |
+
+**Usage example:**
+
+```typescript
+import ProjectCard from "@components/ProjectCard";
+
+<ProjectCard
+  title="Global Buzz"
+  image="/assets/global-buzz.jpg"
+  detail="A dynamic news web application powered by NewsAPI."
+  points={["Real-time news updates", "Server-side rendering with Next.js"]}
+  link="https://globalbuzz.davinash97.xyz"
+  techStack={["Next.js", "TailwindCSS"]}
+/>
+```
+
+## SkillCard
+
+`SkillCard` is used by the Skills section. It renders a category heading and an unordered list of skill names inside an animated card.
+
+**Props** (from `SkillItem`):
+
+| Prop | Type | Required | Description |
+|---|---|---|---|
+| `title` | `string` | Yes | Skill category name (e.g. "Web Development") |
+| `set` | `string[]` | Yes | Individual skill names listed under the category |
+| `className` | `string` | No | Additional CSS classes |
+
+**Usage example:**
+
+```typescript
+import SkillCard from "@components/SkillCard";
+
+<SkillCard
+  title="Web Development"
+  set={["React.js", "Next.js", "TailwindCSS", "SpringBoot"]}
+/>
+```
+
+## ContactCard
+
+`ContactCard` is used by the Contact section. It renders a large icon alongside a title and content. When a `link` is provided, the entire card becomes an anchor tag that opens in a new tab.
+
+**Props** (from `ContactItem`):
+
+| Prop | Type | Required | Description |
+|---|---|---|---|
+| `title` | `string` | Yes | Contact method label (e.g. "Email") |
+| `image` | `IconType` | Yes | React Icons component rendered as the visual icon |
+| `content` | `React.ReactNode` | Yes | Display value such as an email address or handle |
+| `link` | `string` | No | When present, wraps the entire card in a link |
+
+**Usage example:**
+
+```typescript
+import ContactCard from "@components/ContactCard";
+import { MdEmail } from "react-icons/md";
+
+<ContactCard
+  title="Email"
+  image={MdEmail}
+  content="example@email.com"
+  link="mailto:example@email.com"
+/>
+```
+
+## AnimatedSection
+
+`AnimatedSection` is a client component that wraps any content in a Framer Motion `<section>`. It applies a scroll-triggered reveal animation: the section fades in and slides up from `y: 50` when it enters the viewport, and reverses when it exits. The animation triggers each time the element scrolls into view (`once: false`), with a 20% visibility threshold.
+
+**Props:**
+
+| Prop | Type | Required | Description |
+|---|---|---|---|
+| `children` | `ReactNode` | Yes | Content to animate |
+| `className` | `string` | No | CSS classes forwarded to the `<section>` element |
+
+**Source (`src/app/components/AnimatedSection.tsx`):**
+
+```typescript
+"use client";
+
+import { motion } from "framer-motion";
+import { ReactNode } from "react";
+
+interface AnimatedSectionProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export default function AnimatedSection({
+  children,
+  className = "",
+}: AnimatedSectionProps) {
+  return (
+    <motion.section
+      className={className}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: false, amount: 0.2 }}
+      exit="hidden"
+      variants={{
+        hidden: { opacity: 0, y: 50 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.6, ease: "easeInOut" },
+        },
+      }}>
+      {children}
+    </motion.section>
+  );
+}
+```
+
+## Loading
+
+`Loading` is a client component that displays a full-screen overlay while initial data is being fetched. It renders a pulsing `<Loading.../>` heading styled with the Great Vibes font in purple, centred over a semi-transparent black backdrop (`z-50`).
+
+**Source (`src/app/components/Loading.tsx`):**
+
+```typescript
+"use client";
+
+import { Great_Vibes } from "next/font/google";
+
+const greatVibes = Great_Vibes({ weight: "400", subsets: ["latin"] });
+
+export default function Loading() {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
+      <h1
+        className={`flex justify-center gap-5 text-6xl text-purple-500 animate-pulse ${greatVibes.className}`}>
+        {"<Loading.../>"}
+      </h1>
+    </div>
+  );
+}
+```
+
+## SectionTitle component
+
+`SectionTitle` is exported alongside `useSectionData` from `src/app/hooks/useSectionData.tsx`. It renders an animated `<h2>` where every character is split into its own `<span>` element — each span carries the `heading` CSS class, which applies the per-character bounce animation on hover. The heading fades in and slides down from `y: -50` when it enters the viewport.
+
+**Signature:**
+
+```typescript
+export function SectionTitle({ title }: { title: string }): JSX.Element
+```
+
+**Usage example:**
+
+```typescript
+import { SectionTitle } from "@hooks/useSectionData";
+
+<SectionTitle title="Skills" />
+```
+
+## Performance optimization
+
+Two deliberate optimizations reduce render-blocking work:
+
+- **`React.memo` on `Card`** — the `Card` component is the most widely reused component in the portfolio (Experience, Education, Other sections all use it). Wrapping it in `React.memo` ensures it only re-renders when its props actually change, avoiding redundant renders triggered by parent state updates.
+
+- **`preload: false` on all Google Fonts** — every font instantiation in the codebase (Roboto Slab, Fira Sans, Montserrat, Lexend Deca, Great Vibes) passes `preload: false`. This tells Next.js not to inject a `<link rel="preload">` tag for those fonts, so the browser does not block the initial render waiting for font files to download.

@@ -1,0 +1,123 @@
+---
+title: "Next.js and build configuration reference"
+description: "Reference for next.config.ts, netlify.toml, and TypeScript path aliases — each option explained, plus TailwindCSS v4 differences from Tailwind v3 config."
+---
+
+The portfolio relies on a small but important set of configuration files that together control the build output, module path aliases, image optimization, and deployment behavior. Understanding these files makes it easier to extend the project — for example, adding a new image host or a new path alias for a feature module.
+
+## next.config.ts
+
+The Next.js configuration is kept intentionally minimal. Here is the full file:
+
+```typescript
+import type { NextConfig } from "next";
+import path from "path";
+
+const nextConfig: NextConfig = {
+	/* config options here */
+	images: {
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "dummyimage.com",
+				pathname: "/**",
+			},
+		],
+	},
+	webpack: (config) => {
+		config.resolve.alias["@data"] = path.join(__dirname, "src/app/data");
+		return config;
+	},
+	devIndicators: false,
+};
+
+export default nextConfig;
+```
+
+Each option serves a specific purpose:
+
+- **`images.remotePatterns`** — Next.js blocks external image sources by default. This entry allows the `<Image>` component to load images from `dummyimage.com`, which is used for placeholder project screenshots. If you add project images hosted on another domain, you must add a matching entry here (see the tip below).
+
+- **`webpack config.resolve.alias["@data"]`** — Creates a webpack module alias that maps `@data` to `src/app/data`. This lets any webpack-bundled file import JSON data files with `import foo from "@data/foo.json"` instead of a relative path like `../../../data/foo.json`.
+
+- **`devIndicators: false`** — Hides the Next.js development overlay indicator that appears in the bottom-right corner during local development.
+
+<Tip>
+  If you add remote image domains — for example, for a new project screenshot
+  hosted on an external CDN — add the hostname to `next.config.ts` under
+  `images.remotePatterns`. Without this, Next.js will throw a runtime error
+  when the `<Image>` component tries to load the external URL.
+</Tip>
+
+<Note>
+  The `@data` webpack alias only works in webpack-bundled code. The Web Worker
+  uses it via the dynamic `import()` call in `LoadData.ts`, which webpack
+  processes at build time. Do not try to use this alias in non-webpack contexts
+  such as plain Node.js scripts.
+</Note>
+
+## netlify.toml
+
+The `netlify.toml` at the repository root provides Netlify with everything it needs to build and deploy the site:
+
+```toml
+[build]
+	command = "next build"
+	publish = ".next"
+	functions = "netlify/functions"
+```
+
+- **`command`** — The shell command Netlify runs to build the project. `next build` compiles the Next.js application into the `.next` output directory.
+- **`publish`** — The directory Netlify deploys as the site root. Pointing this to `.next` (combined with `@netlify/plugin-nextjs`) lets Netlify serve the full Next.js application, including server-rendered pages.
+- **`functions`** — The directory Netlify scans for serverless function handlers. Any `.ts` or `.js` file found under `netlify/functions/` is compiled and deployed as a Netlify Function.
+
+## TypeScript configuration
+
+Strict TypeScript is enforced across the project (`"strict": true` in `tsconfig.json`). The compiler targets ES2017 and uses `"moduleResolution": "bundler"` so that import behavior matches how Next.js and webpack resolve modules at build time.
+
+The `paths` section in `tsconfig.json` defines import aliases recognized by the TypeScript compiler and your editor:
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@page/*": ["app/page/*"],
+      "@components/*": ["app/components/*"],
+      "@data/*": ["app/data/*"],
+      "@hooks/*": ["app/hooks/*"]
+    }
+  }
+}
+```
+
+| Alias           | Resolves to              | Used for                                 |
+| --------------- | ------------------------ | ---------------------------------------- |
+| `@page/*`       | `src/app/page/*`         | Page-level components                    |
+| `@components/*` | `src/app/components/*`   | Shared UI components                     |
+| `@data/*`       | `src/app/data/*`         | JSON data files (skills, projects, etc.) |
+| `@hooks/*`      | `src/app/hooks/*`        | Custom React hooks                       |
+
+Note that the `@data` alias is declared both here (for TypeScript type-checking) and in `next.config.ts` (for webpack runtime resolution). Both entries must be kept in sync if you change the data directory path.
+
+## TailwindCSS v4
+
+The project uses TailwindCSS v4, which no longer requires a `tailwind.config.js` file. Instead, you add the following single import to your global stylesheet — in this project that is `src/app/globals.css`:
+
+```css
+@import "tailwindcss";
+```
+
+PostCSS integration is provided by `@tailwindcss/postcss` (listed under `devDependencies`). There is no `postcss.config.js` to maintain; the plugin is picked up automatically by Next.js.
+
+This is a significant difference from TailwindCSS v3. If you are following older tutorials that reference `tailwind.config.js` or the `content` array, those instructions do not apply here.
+
+## ESLint
+
+An `eslint.config.mjs` file at the repository root configures ESLint with the standard Next.js ruleset (`eslint-config-next`). To check the entire project for lint errors, run:
+
+```bash
+npm run lint
+```
+
+The `lint` script is defined in `package.json` as `next lint`, which runs ESLint against the Next.js source files with the framework-recommended rules applied.

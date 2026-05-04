@@ -1,0 +1,107 @@
+---
+title: "Deploying the Next.js portfolio to Netlify"
+description: "Deploy with @netlify/plugin-nextjs for automatic SSR and Netlify Functions. Covers connecting GitHub, first-time site setup, and adding a custom domain."
+---
+
+The portfolio is deployed on Netlify using the `@netlify/plugin-nextjs` adapter, which handles server-side rendering and serverless functions automatically. Every push to the connected GitHub repository triggers a fresh build and deployment with no manual steps required.
+
+## How deployment works
+
+Netlify watches your connected GitHub repository for changes. When you push a commit, Netlify runs `next build` in the repository root, then deploys the resulting `.next` output alongside any serverless functions it discovers under `netlify/functions/`. The `@netlify/plugin-nextjs` adapter translates Next.js-specific constructs — server components, API routes, image optimization — into Netlify's infrastructure without any extra configuration on your part.
+
+The full flow looks like this:
+
+1. You push a commit to GitHub.
+2. Netlify detects the push via a webhook.
+3. Netlify installs dependencies and runs `next build`.
+4. Static assets are pushed to Netlify's CDN.
+5. Serverless functions (including `sendMail`) are deployed to Netlify Functions.
+6. The new deployment goes live, replacing the previous one.
+
+The `netlify.toml` at the repository root tells Netlify exactly what to run:
+
+```toml
+[build]
+	command = "next build"
+	publish = ".next"
+	functions = "netlify/functions"
+```
+
+<Note>
+  The `@netlify/plugin-nextjs` package listed in `package.json` handles all the
+  Next.js-to-Netlify adapter configuration — no manual configuration of
+  serverless functions or edge functions is needed.
+</Note>
+
+## First-time setup
+
+If you've forked the repository and want to deploy your own copy, follow these steps:
+
+<Steps>
+  <Step title="Push your fork to GitHub">
+    Make sure your fork is pushed to GitHub and the repository is accessible
+    from your Netlify account.
+  </Step>
+  <Step title="Create a new site in Netlify">
+    Log in to [netlify.com](https://netlify.com), click **Add new site**, then
+    select **Import an existing project**.
+  </Step>
+  <Step title="Connect the GitHub repository">
+    Authorize Netlify to access your GitHub account, then search for and select
+    your fork of the portfolio repository.
+  </Step>
+  <Step title="Confirm the build settings">
+    Netlify should auto-detect the settings from `netlify.toml`. Verify that
+    the build command is `next build` and the publish directory is `.next`. If
+    prompted for a functions directory, enter `netlify/functions`.
+  </Step>
+  <Step title="Deploy the site">
+    Click **Deploy site**. Netlify will run the first build and give you a
+    temporary `*.netlify.app` subdomain once it succeeds.
+  </Step>
+</Steps>
+
+## Netlify Functions
+
+The file `netlify/functions/sendMail.ts` is automatically detected by Netlify because the `functions` key in `netlify.toml` points to `netlify/functions`. Netlify compiles and deploys it as a serverless function available at:
+
+```
+/.netlify/functions/sendMail
+```
+
+The function uses `nodemailer` to send email via an SMTP provider and includes in-memory rate limiting (maximum 3 emails per IP per hour) to prevent abuse. CORS is restricted to `https://davinash97.xyz`, so the function only accepts requests from the live site.
+
+<Tip>
+  Use `netlify dev` locally to run both the Next.js dev server and Netlify
+  Functions together. This gives you end-to-end local testing of the contact
+  form without deploying to production first.
+</Tip>
+
+## Custom domain
+
+The portfolio is live at [davinash97.xyz](https://davinash97.xyz). To point your own domain to a Netlify site:
+
+1. In the Netlify dashboard, go to **Domain management** for your site.
+2. Click **Add a domain** and enter your custom domain.
+3. Update your domain registrar's nameservers to point to Netlify's DNS (recommended), or add the CNAME/A records Netlify provides.
+4. Netlify will automatically provision and renew a TLS certificate for the domain.
+
+<Info>
+  Netlify provides automatic HTTPS/SSL for both the default
+  `*.netlify.app` subdomain and any custom domains you add — no manual
+  certificate configuration is required.
+</Info>
+
+## Environment variables for the contact form
+
+The `sendMail` function reads SMTP credentials from environment variables at runtime. Without these, the contact form will fail with a 500 error. Set the following variables in **Netlify → Site configuration → Environment variables**:
+
+| Variable    | Description                                           |
+| ----------- | ----------------------------------------------------- |
+| `SMTP_HOST` | Hostname of your SMTP server (e.g. `smtp.gmail.com`) |
+| `SMTP_PORT` | SMTP port — typically `587` (TLS) or `465` (SSL)     |
+| `SMTP_USER` | SMTP username / sender email address                  |
+| `SMTP_PASS` | SMTP password or app-specific password                |
+| `SMTP_TO`   | Recipient email address for form submissions          |
+
+After adding or changing these variables, trigger a new deploy so the updated values are available to the function.

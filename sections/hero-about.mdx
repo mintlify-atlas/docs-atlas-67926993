@@ -1,0 +1,79 @@
+---
+title: "Hero and About sections of the portfolio"
+description: "Hero covers the viewport with an animated gradient and cycling subheading. About shows a bio. Both are hardcoded directly in their TSX component files."
+---
+
+The Hero and About sections are the first two things visitors encounter on the portfolio. Hero fills the entire viewport with a dynamic animated greeting, while About follows immediately below with a paragraph introducing Avinash's background, skills, and motivations. Neither section is driven by a JSON data file — their content lives directly in the component source files.
+
+## Hero
+
+The Hero section (`src/app/page/hero/Hero.tsx`) renders a full-screen `<section>` with an animated gradient background and a scroll-triggered parallax fade effect. As you scroll down, the overlay and text fade out and shift upward at 20% of the scroll distance.
+
+The content it renders:
+
+- **Heading**: `"Welcome to my Portfolio"` — each word animates in with a staggered fade-up effect using Framer Motion.
+- **Subheading**: `"I am"` followed by a rotating name that cycles through four values every 2 seconds: `"Avinash"`, `"a Software Engineer"`, `"an Electrical Engineer"`, and `"a Tech enthusiast"`. The rotation pauses on hover.
+- **Scroll indicator**: A bouncing `"↓ Scroll down here"` prompt at the bottom of the viewport.
+- **Hamburger icon**: A decorative `<Hamburger />` component anchored to the top-right corner, rendered as three horizontal `<span>` lines styled via CSS.
+
+The cycling names are defined in the `nameArr` constant at the top of `Hero.tsx`:
+
+```tsx src/app/page/hero/Hero.tsx
+const nameArr = [
+  "Avinash",
+  "a Software Engineer",
+  "an Electrical Engineer",
+  "a Tech enthusiast",
+];
+```
+
+## About
+
+The About section (`src/app/page/about/About.tsx`) renders a `<section>` set to `60dvh` in height with an animated paragraph that slides in from the right as you scroll it into view.
+
+The paragraph text describes Avinash as a Computer Science Engineer with an Electrical Engineering background from RSR Rungta College of Engineering & Technology, Bhilai, Chhattisgarh, India. It covers his current role at Amazon in Bangalore, his interdisciplinary background bridging full-stack development with embedded systems and IoT, and his interest in AI, machine learning, and open source.
+
+The full paragraph is a single hardcoded template literal inside the component's JSX:
+
+```tsx src/app/page/about/About.tsx
+<motion.p ...>
+  {`I'm a Computer Science Engineer with a strong foundation in Electrical
+  Engineering, from RSR Rungta College of Engineering & Technology, Bhilai,
+  Chhattisgarh -India. Combining software expertise with hardware knowledge
+  to create comprehensive solutions. Currently Working in Amazon in Bangalore.
+  ...`}
+</motion.p>
+```
+
+## Adding or editing content
+
+Because both sections are hardcoded in their TSX components rather than loaded from a data file, you edit the source files directly to change any text.
+
+**To update the Hero cycling names**, open `src/app/page/hero/Hero.tsx` and modify the `nameArr` array:
+
+```tsx
+// Before
+const nameArr = [
+  "Avinash",
+  "a Software Engineer",
+  "an Electrical Engineer",
+  "a Tech enthusiast",
+];
+
+// After — adding a new identity
+const nameArr = [
+  "Avinash",
+  "a Software Engineer",
+  "an Electrical Engineer",
+  "a Tech enthusiast",
+  "a DevOps Engineer",
+];
+```
+
+**To update the Hero heading**, find the string `"Welcome to my Portfolio"` inside the `<motion.h1>` element and replace it with your preferred heading text.
+
+**To update the About paragraph**, open `src/app/page/about/About.tsx` and replace the template literal string inside the `<motion.p>` block with your new bio text.
+
+<Tip>
+  Hero and About content is hardcoded directly in the component TSX files — edit `src/app/page/hero/Hero.tsx` and `src/app/page/about/About.tsx` to personalize them. There is no JSON data file for these two sections.
+</Tip>
